@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     PORT: int = 8000
     HOST: str = "0.0.0.0"
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:8000,http://localhost:8000,http://localhost:5173"
+    ALLOWED_ORIGINS: str = "*"
 
     # Database Configuration
     DATABASE_URL: str = "postgresql+psycopg2://postgres:postgrespassword@localhost:5432/revenue_recovery"
