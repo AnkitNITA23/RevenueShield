@@ -1,0 +1,12 @@
+{
+  "name": "revenue-shield-recovery-portal",
+  "version": "1.0.0",
+  "description": "RevenueShield AI Customer Payment Recovery Portal",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "^5.4.2"
+  }
+}
