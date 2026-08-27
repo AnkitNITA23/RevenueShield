@@ -258,7 +258,36 @@ def trigger_live_outreach(
     except Exception as e:
         logger.error(f"Failed to initiate live call: {e}")
         return {
-            "status": "simulation_logged",
-            "message": f"Twilio call logged (Note: {str(e)})",
+            "status": "error",
+            "message": str(e),
             "phone_number": phone_number,
         }
+
+
+@router.get(
+    "/call-status/{call_sid}",
+    status_code=status.HTTP_200_OK,
+    summary="Get Twilio Call Status",
+    description="Fetches live status and any error codes from Twilio for a given call SID.",
+)
+def get_call_status(
+    call_sid: str,
+) -> Dict[str, Any]:
+    """Fetch live Twilio call details."""
+    from app.core.config import settings
+    from twilio.rest import Client
+    try:
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        call = client.calls(call_sid).fetch()
+        return {
+            "sid": call.sid,
+            "status": call.status,
+            "duration": call.duration,
+            "to": call.to,
+            "from": call.from_,
+            "price": call.price,
+            "error_code": getattr(call, "error_code", None),
+            "error_message": getattr(call, "error_message", None),
+        }
+    except Exception as e:
+        return {"error": str(e)}
