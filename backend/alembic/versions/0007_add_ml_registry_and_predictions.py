@@ -14,7 +14,7 @@ from sqlalchemy.dialects import postgresql
 from app.db.base import GUID, JSON_TYPE
 
 # revision identifiers, used by Alembic.
-revision: str = '0007_add_ml_registry_and_predictions'
+revision: str = '0007_ml_registry_predictions'
 down_revision: Union[str, None] = '0006_add_sync_checkpoints'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

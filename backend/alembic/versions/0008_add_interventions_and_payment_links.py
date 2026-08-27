@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from app.db.base import GUID
 
 # revision identifiers, used by Alembic.
-revision: str = '0008_add_interventions_and_payment_links'
-down_revision: Union[str, None] = '0007_add_ml_registry_and_predictions'
+revision: str = '0008_interventions_pay_links'
+down_revision: Union[str, None] = '0007_ml_registry_predictions'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
