@@ -147,9 +147,13 @@ def run_demo_seeder(db: Session) -> Dict[str, Any]:
             # Audit Log
             audit = AuditLog(
                 id=uuid.uuid4(),
-                case_id=case.id,
+                recovery_case_id=case.id,
+                actor_type="SYSTEM",
+                actor_id="AUTONOMOUS_AI",
                 action="AUTONOMOUS_NBA_ORCHESTRATED",
-                details={"action_type": rec_act, "probability": prob, "erv": float(erv)},
+                entity_type="RECOVERY_CASE",
+                entity_id=str(case.id),
+                audit_metadata={"action_type": rec_act, "probability": prob, "erv": float(erv)},
             )
             db.add(audit)
 
@@ -213,20 +217,21 @@ def run_demo_seeder(db: Session) -> Dict[str, Any]:
         if not existing_outcome:
             outc = RecoveryOutcome(
                 id=uuid.uuid4(),
-                case_id=case_objects[2].id,
+                recovery_case_id=case_objects[2].id,
+                amount_at_risk=amt,
                 amount_recovered=amt,
-                currency="INR",
-                channel_used=chan,
+                recovery_percentage=100.0,
+                outcome_type="RECOVERED",
+                attribution=chan,
                 occurred_at=outcome_time,
-                verified=True,
-                attribution_window_hours=72,
             )
             db.add(outc)
 
             attr = RecoveryAttribution(
                 id=uuid.uuid4(),
-                outcome_id=outc.id,
-                channel=chan,
+                recovery_case_id=case_objects[2].id,
+                amount_recovered=amt,
+                attribution_type="PRIMARY",
                 attribution_weight=1.0,
             )
             db.add(attr)
