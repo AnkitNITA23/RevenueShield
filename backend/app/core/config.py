@@ -1,4 +1,5 @@
 from typing import Optional
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,11 +10,23 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
     PORT: int = 8000
-    HOST: str = "127.0.0.1"
+    HOST: str = "0.0.0.0"
     ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:8000,http://localhost:8000,http://localhost:5173"
 
     # Database Configuration
     DATABASE_URL: str = "postgresql+psycopg2://postgres:postgrespassword@localhost:5432/revenue_recovery"
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def normalize_database_url(cls, v: Optional[str]) -> str:
+        if not v:
+            return "postgresql+psycopg2://postgres:postgrespassword@localhost:5432/revenue_recovery"
+        val = str(v).strip()
+        if val.startswith("postgres://"):
+            return val.replace("postgres://", "postgresql+psycopg2://", 1)
+        if val.startswith("postgresql://") and not val.startswith("postgresql+"):
+            return val.replace("postgresql://", "postgresql+psycopg2://", 1)
+        return val
 
     # Razorpay Test / Live Mode Credentials (Loaded from environment)
     RAZORPAY_KEY_ID: Optional[str] = None
