@@ -2,18 +2,14 @@
  * RevenueShield — Command Center Dashboard & Recovery Portal Application
  */
 
-// 1. Vite environment variable (e.g. VITE_API_BASE_URL or VITE_API_URL) for Vercel/Production builds
-// 2. Local development fallback (ports 3000, 5173, 8080 point to http://127.0.0.1:8000)
-// 3. Same-origin fallback (when hosted directly via FastAPI backend /portal)
-const ENV_API_URL = typeof import.meta !== 'undefined' && import.meta.env
-  ? (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '')
-  : '';
-
-const API_BASE = (ENV_API_URL && String(ENV_API_URL).trim())
-  ? String(ENV_API_URL).trim().replace(/\/+$/, '')
-  : (typeof window !== 'undefined' && (window.location.origin.includes(':3000') || window.location.origin.includes(':5173') || window.location.origin.includes(':8080')))
+// API Base URL Configuration:
+// 1. Direct Vite replacement at build time (from VITE_API_BASE_URL environment variable on Vercel/production)
+// 2. Localhost fallback for local dev servers (:3000, :5173, :8080)
+// 3. Same-origin fallback (when hosted alongside FastAPI at /portal)
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '') ||
+  (typeof window !== 'undefined' && (window.location.origin.includes(':3000') || window.location.origin.includes(':5173') || window.location.origin.includes(':8080'))
     ? 'http://127.0.0.1:8000'
-    : '';
+    : '');
 
 // State
 let currentSelectedCase = null;
