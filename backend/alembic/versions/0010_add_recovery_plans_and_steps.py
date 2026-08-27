@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from app.db.base import GUID, JSON_TYPE
 
 # revision identifiers, used by Alembic.
-revision: str = '0010_add_recovery_plans_and_steps'
+revision: str = '0010_recovery_plans_steps'
 down_revision: Union[str, None] = '0009_add_communications'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

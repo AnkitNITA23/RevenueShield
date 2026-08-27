@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from app.db.base import GUID, JSON_TYPE
 
 # revision identifiers, used by Alembic.
-revision: str = '0012_extend_promise_to_pay_fields'
+revision: str = '0012_extend_ptp_fields'
 down_revision: Union[str, None] = '0011_self_learning_feedback'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

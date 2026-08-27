@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 from app.models.customer import Customer
 from app.models.payment import Payment
 from app.integrations.razorpay.payment_normalizer import NormalizedPaymentData
-from app.services.customer_service import CustomerService
 
 logger = logging.getLogger(__name__)
 

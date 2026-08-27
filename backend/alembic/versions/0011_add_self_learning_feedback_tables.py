@@ -12,7 +12,7 @@ from app.db.base import GUID, JSON_TYPE
 
 # revision identifiers, used by Alembic.
 revision: str = '0011_self_learning_feedback'
-down_revision: Union[str, None] = '0010_add_recovery_plans_and_steps'
+down_revision: Union[str, None] = '0010_recovery_plans_steps'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
