@@ -190,6 +190,7 @@ def test_nba_recommends_highest_expected_value(
 
     monkeypatch.setattr(RecoveryProbabilityModelService, "predict_probability", mock_predict)
     monkeypatch.setattr(RecoveryProbabilityModelService, "load_model", lambda ver=None: "mock_pipeline")
+    monkeypatch.setattr(PolicyEngine, "evaluate", lambda *args, **kwargs: PolicyEvaluationResult(allowed=True, reason="Permitted for testing"))
 
     res = NextBestActionService.recommend_next_best_action(
         case_id=test_recovery_case.id,

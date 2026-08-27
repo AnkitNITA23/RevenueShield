@@ -210,3 +210,55 @@ def get_data_quality_metrics(
     """Fetch aggregate data quality dashboard metrics."""
     summary = RazorpayPaymentSyncService.get_data_quality_summary(db)
     return DataQualitySummaryResponse(**summary)
+
+
+@router.post(
+    "/seed-demo-data",
+    status_code=status.HTTP_200_OK,
+    summary="Seed Realistic Demonstration Data",
+    description="Populates the database with rich multi-customer cases, 30-day recovery trends, PTP commitments, and channel metrics.",
+)
+def seed_demo_data_endpoint(
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Execute comprehensive realistic demo data seeding."""
+    from app.scripts_runner import run_demo_seeder
+    result = run_demo_seeder(db)
+    return {"status": "success", "message": "Demo data successfully seeded.", "summary": result}
+
+
+@router.post(
+    "/trigger-live-outreach",
+    status_code=status.HTTP_200_OK,
+    summary="Trigger Live Voice Call Outreach",
+    description="Initiates a live outbound recovery call via Twilio to the configured demo phone number.",
+)
+def trigger_live_outreach(
+    phone_number: str = Query(default="+917991142735"),
+    email: str = Query(default="kdmspokharahan@gmail.com"),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Trigger a live Twilio voice call for interactive demonstration."""
+    from app.integrations.voice.twilio_client import TwilioVoiceClient
+    try:
+        client = TwilioVoiceClient()
+        twiml = f"""<Response>
+            <Say voice="Polly.Aditi" language="en-IN">Hello! This is RevenueShield's Autonomous AI Recovery Assistant calling on behalf of ByteScale Software regarding invoice number INV-9821. An outstanding payment of 12,500 Rupees was recently declined. Would you like to schedule a payment arrangement or receive a secure payment link by SMS?</Say>
+            <Gather input="speech" timeout="5" speechTimeout="auto" action="/webhooks/twilio/status">
+                <Say voice="Polly.Aditi" language="en-IN">Please speak your response now.</Say>
+            </Gather>
+        </Response>"""
+        call_res = client.create_outbound_call(to_number=phone_number, twiml=twiml)
+        return {
+            "status": "call_initiated",
+            "phone_number": phone_number,
+            "call_sid": call_res.get("call_sid"),
+            "provider_status": call_res.get("status"),
+        }
+    except Exception as e:
+        logger.error(f"Failed to initiate live call: {e}")
+        return {
+            "status": "simulation_logged",
+            "message": f"Twilio call logged (Note: {str(e)})",
+            "phone_number": phone_number,
+        }
