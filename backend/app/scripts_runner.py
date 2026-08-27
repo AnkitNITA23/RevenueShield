@@ -87,7 +87,7 @@ def run_demo_seeder(db: Session) -> Dict[str, Any]:
         (customers[6], Decimal("15200.00"), "IN_PROGRESS", "INSUFFICIENT_FUNDS", "WHATSAPP", 0.74, Decimal("11248.00")),
     ]
 
-    created_cases = 0
+    case_objects = []
     for cust, amt, status, diag_code, rec_act, prob, erv in cases_data:
         existing_case = db.scalar(select(RecoveryCase).where(RecoveryCase.customer_id == cust.id))
         if existing_case:
@@ -114,32 +114,33 @@ def run_demo_seeder(db: Session) -> Dict[str, Any]:
                 currency="INR",
                 case_type="PAYMENT_FAILURE",
                 status=status,
-                attempt_count=1,
-                priority="HIGH" if amt > Decimal("20000.00") else "NORMAL",
+                retry_count=1,
             )
             db.add(case)
             db.flush()
-            created_cases += 1
 
             # Diagnosis
             diag = Diagnosis(
                 id=uuid.uuid4(),
-                case_id=case.id,
-                primary_root_cause=diag_code,
-                confidence_score=prob,
-                is_recoverable=True,
+                recovery_case_id=case.id,
+                category=diag_code,
+                failure_code="BAD_REQUEST_ERROR",
+                confidence=prob,
                 explanation=f"Autonomous diagnostic engine classified payment decline as {diag_code}.",
+                evidence={"root_cause": diag_code, "severity": "HIGH"},
             )
             db.add(diag)
 
             # Recovery Action
             act = RecoveryAction(
                 id=uuid.uuid4(),
-                case_id=case.id,
+                recovery_case_id=case.id,
                 action_type=rec_act,
-                status="COMPLETED" if status == "RECOVERED" else "EXECUTED",
-                ranking_score=prob,
+                status="COMPLETED" if status == "RECOVERED" else "RECOMMENDED",
                 channel=rec_act,
+                confidence=prob,
+                decision_score=prob,
+                reason=f"Recommended via ML Expected Recovery Value model (ERV: ₹{erv}).",
             )
             db.add(act)
 
@@ -152,18 +153,22 @@ def run_demo_seeder(db: Session) -> Dict[str, Any]:
             )
             db.add(audit)
 
+        case_objects.append(case)
+
     # 4. Create Active Promise-to-Pay agreements
     ptp_1 = db.scalar(select(PromiseToPay).where(PromiseToPay.customer_id == target_cust.id))
     if not ptp_1:
         ptp_1 = PromiseToPay(
             id=uuid.uuid4(),
+            recovery_case_id=case_objects[0].id,
             customer_id=target_cust.id,
+            amount_due=Decimal("12500.00"),
             promised_amount=Decimal("12500.00"),
             currency="INR",
             promised_date=now + timedelta(days=2),
             status="ACTIVE",
-            source="TWILIO_VOICE",
-            confidence_score=0.90,
+            source="VOICE",
+            confidence=0.90,
             notes="Customer confirmed invoice payment during Twilio AI Voice call.",
         )
         db.add(ptp_1)
@@ -172,19 +177,20 @@ def run_demo_seeder(db: Session) -> Dict[str, Any]:
     if not ptp_2:
         ptp_2 = PromiseToPay(
             id=uuid.uuid4(),
+            recovery_case_id=case_objects[1].id,
             customer_id=customers[1].id,
+            amount_due=Decimal("45000.00"),
             promised_amount=Decimal("45000.00"),
             currency="INR",
             promised_date=now + timedelta(days=1),
             status="ACTIVE",
-            source="TWILIO_VOICE",
-            confidence_score=0.95,
+            source="VOICE",
+            confidence=0.95,
             notes="Finance director scheduled card limit increase for tomorrow morning.",
         )
         db.add(ptp_2)
 
     # 5. Populate 30 Days of Historical Recovery Outcomes for rich charts
-    # Generates a continuous daily and cumulative recovery progression
     daily_recoveries = [
         (28, Decimal("8500.00"), "EMAIL"),
         (26, Decimal("14000.00"), "VOICE"),
@@ -207,7 +213,7 @@ def run_demo_seeder(db: Session) -> Dict[str, Any]:
         if not existing_outcome:
             outc = RecoveryOutcome(
                 id=uuid.uuid4(),
-                case_id=customers[2].id,
+                case_id=case_objects[2].id,
                 amount_recovered=amt,
                 currency="INR",
                 channel_used=chan,
@@ -229,7 +235,7 @@ def run_demo_seeder(db: Session) -> Dict[str, Any]:
 
     return {
         "customers_seeded": len(customers),
-        "cases_seeded": len(cases_data),
+        "cases_seeded": len(case_objects),
         "target_customer": "ByteScale Software (kdmspokharahan@gmail.com / +917991142735)",
         "active_ptp_volume": "₹57,500.00",
         "historical_recovered_total": "₹2,16,700.00",
