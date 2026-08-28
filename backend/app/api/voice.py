@@ -157,11 +157,11 @@ async def twilio_test_voice_twiml(
     twiml_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Gather input="speech" action="{gather_url}" method="POST" speechTimeout="auto" language="en-IN">
-        <Say language="en-IN" voice="Polly.Aditi">Hello {customer_name}. This is an important payment reminder regarding your pending outstanding payment of 4,999.00 Rupees.</Say>
+        <Say language="en-IN" voice="Polly.Aditi">Namaste! This is Aditi, calling from RevenueShield's Autonomous Recovery Team for ByteScale Software. This is an important payment reminder regarding your pending subscription payment of 10,000 Rupees for invoice INV-9821.</Say>
         <Pause length="1"/>
-        <Say language="en-IN" voice="Polly.Aditi">Could you please tell us by when you will be able to complete this payment, so we can record your promise to pay?</Say>
+        <Say language="en-IN" voice="Polly.Aditi">Could you please confirm if you will be able to complete this payment by this Friday, so we can record your promise to pay?</Say>
     </Gather>
-    <Say language="en-IN" voice="Polly.Aditi">We did not receive your response. A direct payment link has been sent to your registered WhatsApp and email. Thank you, and have a wonderful day.</Say>
+    <Say language="en-IN" voice="Polly.Aditi">Thank you. A direct Razorpay payment link of 10,000 Rupees has also been sent to your registered email kdmspokharahan@gmail.com. Have a wonderful day!</Say>
     <Hangup/>
 </Response>"""
     return Response(content=twiml_content.strip(), media_type="application/xml")
